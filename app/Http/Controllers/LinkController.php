@@ -14,6 +14,7 @@ class LinkController extends Controller
             'url' => 'required|url'
         ]);
 
+        // Verifica se o link já foi encurtado antes
         $existingLink = Link::where('original_url', $request->url)->first();
         if ($existingLink) {
             return response()->json([
