@@ -105,55 +105,59 @@
       })
 
       $btn.addEventListener('click', async (e) => {
-        e.preventDefault();
+        e.preventDefault()
         const data = {
-          name: document.getElementById('name').value,
-          phone: document.getElementById('phone').value,
-          email: document.getElementById('email').value,
-          date: document.getElementById('date').value,
-          time: document.getElementById('time').value
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            date: document.getElementById('date').value,
+            time: document.getElementById('time').value
         }
 
         if (!data.date || !data.time) {
-          alert('Preencha a data e o horário.')
-          return
+            alert('Preencha a data e o horário.')
+            return
         }
 
         $btn.disabled = true
         $btn.textContent = 'Agendando...'
 
         try {
-          const response = await fetch('https://teste.xl4y3r.com/api/appointments', {
+            const response = await fetch('https://teste.xl4y3r.com/api/appointments', {
             method: 'POST',
-            //mode: 'no-cors',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer f62cfa835ccb11f6ae940b09cef84a54cb353b8989f79cfab9e0a846997a575e'
+                'content-type': 'application/json',
+                'authorization': 'Bearer f62cfa835ccb11f6ae940b09cef84a54cb353b8989f79cfab9e0a846997a575e'
             },
             body: JSON.stringify({
-              customer_name: data.name,
-              phone: data.phone,
-              email: data.email,
-              scheduled_at: `${data.date} ${data.time}`
+                customer_name: data.name,
+                phone: data.phone,
+                email: data.email,
+                scheduled_at: `${data.date} ${data.time}`
             })
-          })
+            })
 
-          if (!response.ok) {
-            const erro = await response.json()
-            throw new Error(erro.message || 'Erro ao agendar')
-          }
+            if (!response.ok) {
+            let erroMsg = `Erro ${response.status}`
+            try {
+                const erro = await response.json()
+                erroMsg = erro.message || erroMsg
+            } catch (_) {}
+            throw new Error(erroMsg)
+            }
 
-          alert('Agendamento realizado com sucesso!')
-          document.getElementById('form-agendamento').reset()
-          $time.innerHTML = '<option value="">Selecione uma data primeiro</option>'
-          $time.disabled = true
-          $btn.disabled = true
-        } catch (err) {
-          alert('Erro: ' + err.message)
-        } finally {
-          $btn.textContent = 'Agendar'
-        }
-      })
+            alert('Agendamento realizado com sucesso!')
+            document.getElementById('form-agendamento').reset()
+            $time.innerHTML = '<option value="">Selecione uma data primeiro</option>'
+            $time.disabled = true
+            $btn.disabled = true
+            } catch (err) {
+                alert('Erro: ' + err.message)
+            } finally {
+                $btn.textContent = 'Agendar'
+            }
+        })
+
     })
     </script>
 
