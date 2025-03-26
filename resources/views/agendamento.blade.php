@@ -127,13 +127,15 @@
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
+                'Accept': 'application/json',
                 'authorization': 'Bearer f62cfa835ccb11f6ae940b09cef84a54cb353b8989f79cfab9e0a846997a575e'
             },
             body: JSON.stringify({
-                customer_name: data.name,
+                name: data.name,
                 phone: data.phone,
                 email: data.email,
-                scheduled_at: `${data.date} ${data.time}`
+                date: data.date,
+                time: data.time
             })
             })
 
@@ -151,8 +153,13 @@
             $time.innerHTML = '<option value="">Selecione uma data primeiro</option>'
             $time.disabled = true
             $btn.disabled = true
-            } catch (err) {
-                alert('Erro: ' + err.message)
+            }catch (err) {
+                if (err.errors) {
+                    const mensagens = Object.values(err.errors).flat().join('\n');
+                    alert('Erro:\n' + mensagens);
+                } else {
+                    alert('Erro: ' + (err.message || 'Erro ao agendar'));
+                }
             } finally {
                 $btn.textContent = 'Agendar'
             }
