@@ -44,7 +44,7 @@
             <div class="form-text text-danger mt-1 d-none" id="msg-horario"></div>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100" id="btn-agendar" name="btn-agendar" >
+          <button type="button" class="btn btn-primary w-100" id="btn-agendar" name="btn-agendar" >
             Agendar
           </button>
         </form>
