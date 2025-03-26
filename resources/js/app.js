@@ -3,8 +3,10 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@coreui/coreui/dist/css/coreui.min.css'
 //import * as bootstrap from 'bootstrap'
 import { createApp } from 'vue'
-import AgendamentoForm from './components/AgendamentoForm.vue'
+//import AgendamentoForm from './components/AgendamentoForm.vue'
+import App from './App.vue'
 
-const app = createApp({})
-app.component('agendamento-form', AgendamentoForm)
-app.mount('#app')
+//const app = createApp({})
+//app.component('agendamento-form', AgendamentoForm)
+//app.mount('#app')
+createApp(App).mount('#app')
