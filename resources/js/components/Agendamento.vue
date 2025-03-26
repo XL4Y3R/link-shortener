@@ -4,10 +4,10 @@
   
       <!-- Dados do cliente -->
       <div class="grid grid-cols-2 gap-4">
-        <input v-model="nome" type="text" placeholder="Nome" class="input" />
-        <input v-model="sobrenome" type="text" placeholder="Sobrenome" class="input" />
-        <input v-model="telefone" type="text" placeholder="Telefone" class="input" />
-        <input v-model="email" type="email" placeholder="Email" class="input" />
+        <InputField v-model="nome" label="Nome" id="nome" />        
+        <InputField v-model="sobrenome" label="Sobrenome" id="sobrenome" />
+        <InputField v-model="telefone" label="Telefone" id="telefone" />
+        <InputField v-model="email" label="Email" id="Email"  type="email"/>
       </div>
   
       <!-- Seleção de data -->
@@ -23,34 +23,35 @@
         <div v-for="(grupo, periodo) in horariosPorPeriodo" :key="periodo">
           <h4 class="text-md font-medium mb-1">{{ periodo }}</h4>
           <div class="flex flex-wrap gap-2">
-            <button
-              v-for="hora in grupo"
-              :key="hora"
-              @click="horarioSelecionado = hora"
-              :class="[
-                'px-4 py-2 rounded border cursor-pointer',
-                horarioSelecionado === hora ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
-              ]"
-            >
-              {{ hora }}
-            </button>
+            <HorarioButton
+                v-for="hora in grupo"
+                :key="hora"
+                :hora="hora"
+                :selected="horarioSelecionado === hora"
+                @select="horarioSelecionado = $event"
+              />
+            
           </div>
         </div>
+        <!-- Botão de envio -->
+        <button
+          @click="enviarAgendamento"
+          :disabled="carregando"
+          class="w-full flex justify-center items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span v-if="!carregando">Confirmar Agendamento</span>
+          <span v-else>Agendando...</span>
+        </button>
       </div>
-  
-      <!-- Botão de envio -->
-      <button
-        @click="enviarAgendamento"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
-      >
-        Confirmar Agendamento
-      </button>
+      <div v-if="mensagem" class="text-green-600 text-sm text-center mt-2">{{ mensagem }}</div>
+      <div v-if="erro" class="text-red-600 text-sm text-center mt-2">{{ erro }}</div>
     </div>
   </template>
   
-  <script setup>
+<script setup>
 import { ref, computed } from 'vue'
 import InputField from './InputField.vue'
+import HorarioButton from './HorarioButton.vue'
 
 
 const nome = ref('')
@@ -63,6 +64,8 @@ const horarioSelecionado = ref('')
 const carregandoHorarios = ref(false)
 const mensagem = ref('')
 const erro = ref('')
+const carregando = ref(false)
+
 
 // Agrupar horários por período (manhã, tarde, noite)
 const horariosPorPeriodo = computed(() => {
@@ -95,7 +98,6 @@ async function buscarHorarios() {
   try {
     const response = await fetch(`/api/horarios?date=${dataSelecionada.value}`, {
       headers: {
-        'Authorization': 'Bearer f62cfa835ccb11f6ae940b09cef84a54cb353b8989f79cfab9e0a846997a575e',
         'Content-Type': 'application/json',
       }
     })
@@ -116,49 +118,60 @@ async function buscarHorarios() {
 
 // Enviar agendamento real
 async function enviarAgendamento() {
-  erro.value = ''
-  mensagem.value = ''
+  carregando.value = true
+  try {   
+    erro.value = ''
+    mensagem.value = ''
 
-  if (!nome.value || !sobrenome.value || !telefone.value || !email.value || !dataSelecionada.value || !horarioSelecionado.value) {
-    erro.value = 'Por favor, preencha todos os campos e selecione um horário.'
-    return
+    // Validação básica
+    if (!nome.value || !sobrenome.value || !telefone.value || !email.value || !dataSelecionada.value || !horarioSelecionado.value) {
+      erro.value = 'Por favor, preencha todos os campos e selecione um horário.'
+      return
+    }
+
+    // Payload com os nomes corretos exigidos pela API
+    const payload = {
+      name: `${nome.value} ${sobrenome.value}`.trim(),
+      phone: telefone.value,
+      email: email.value,
+      date: dataSelecionada.value,
+      time: horarioSelecionado.value
+    }
+
+    try {
+      const response = await fetch('/api/agendamentos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Erro ao salvar o agendamento.')
+      }
+
+      mensagem.value = '✅ Agendamento realizado com sucesso!'
+
+      // Limpa o formulário
+      nome.value = ''
+      sobrenome.value = ''
+      telefone.value = ''
+      email.value = ''
+      dataSelecionada.value = ''
+      horarioSelecionado.value = ''
+      horarios.value = []
+    } catch (e) {
+      erro.value = e.message
+    }
+  } finally {
+    carregando.value = false
   }
 
-  const payload = {
-    nome: nome.value,
-    sobrenome: sobrenome.value,
-    telefone: telefone.value,
-    email: email.value,
-    data: dataSelecionada.value,
-    horario: horarioSelecionado.value,
-  }
-
-  try {
-    const response = await fetch('/api/agendamentos', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer f62cfa835ccb11f6ae940b09cef84a54cb353b8989f79cfab9e0a846997a575e',
-        'Content-Type': 'application/json',
-    },
-      body: JSON.stringify(payload),
-    })
-
-    if (!response.ok) throw new Error('Erro ao agendar')
-
-    mensagem.value = '✅ Agendamento realizado com sucesso!'
-
-    // Limpa os campos
-    nome.value = ''
-    sobrenome.value = ''
-    telefone.value = ''
-    email.value = ''
-    dataSelecionada.value = ''
-    horarioSelecionado.value = ''
-    horarios.value = []
-  } catch (e) {
-    erro.value = 'Não foi possível agendar. Tente novamente mais tarde.'
-  }
+  
 }
+
 </script>
   
   <style scoped>
