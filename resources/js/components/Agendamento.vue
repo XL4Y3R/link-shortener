@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
-      <h2 class="text-2xl font-bold mb-4">Agendamento</h2>
+      <h2 class="text-2xl font-bold mb-4">Agendamento -> {{ timeZoneCliente }}</h2>
   
       <!-- Dados do cliente -->
       <div class="grid grid-cols-2 gap-4">
@@ -65,6 +65,8 @@ const carregandoHorarios = ref(false)
 const mensagem = ref('')
 const erro = ref('')
 const carregando = ref(false)
+const timeZoneCliente = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
+
 
 
 // Agrupar horários por período (manhã, tarde, noite)
@@ -96,7 +98,7 @@ async function buscarHorarios() {
   erro.value = ''
 
   try {
-    const response = await fetch(`/api/horarios?date=${dataSelecionada.value}`, {
+    const response = await fetch(`/api/horarios?date=${dataSelecionada.value}&tz=${timeZoneCliente.value}`, {
       headers: {
         'Content-Type': 'application/json',
       }
@@ -135,7 +137,8 @@ async function enviarAgendamento() {
       phone: telefone.value,
       email: email.value,
       date: dataSelecionada.value,
-      time: horarioSelecionado.value
+      time: horarioSelecionado.value,
+      timezone: timeZoneCliente.value
     }
 
     try {
