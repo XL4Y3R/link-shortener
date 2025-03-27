@@ -29,7 +29,12 @@
                             >
                                 {{ $t("form.firstName") }}
                             </label>
-                            <InputField v-model="firstName" id="firstName" />
+                            <InputField
+                                v-model="firstName"
+                                id="firstName"
+                                ref="firstNameRef"
+                                @blur="firstName = capitalizeName(firstName)"
+                            />
                             <ErrorMessage :message="errors.firstName" />
                         </div>
 
@@ -40,21 +45,38 @@
                             >
                                 {{ $t("form.lastName") }}
                             </label>
-                            <InputField v-model="lastName" id="lastName" />
+                            <InputField
+                                v-model="lastName"
+                                id="lastName"
+                                ref="lastNameRef"
+                                @blur="lastName = capitalizeName(lastName)"
+                            />
                             <ErrorMessage :message="errors.lastName" />
                         </div>
-
-                        <div>
-                            <label
-                                :for="phone"
-                                class="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                {{ $t("form.phone") }}
-                            </label>
-                            <InputField v-model="phone" id="phone" />
-                            <ErrorMessage :message="errors.phone" />
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <!-- Country code + phone -->
+                            <div class="col-span-2 flex gap-2 items-start">
+                                <CountryCodeSelect
+                                    v-model="phoneCode"
+                                    class="w-20"
+                                />
+                                <div class="flex-1">
+                                    <label
+                                        for="phone"
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        {{ $t("form.phone") }}
+                                    </label>
+                                    <InputField
+                                        v-model="phone"
+                                        id="phone"
+                                        ref="phoneRef"
+                                        placeholder="123-456-7890"
+                                    />
+                                    <ErrorMessage :message="errors.phone" />
+                                </div>
+                            </div>
                         </div>
-
                         <div>
                             <label
                                 :for="email"
@@ -66,6 +88,7 @@
                                 v-model="email"
                                 id="email"
                                 type="email"
+                                ref="emailRef"
                             />
                             <ErrorMessage :message="errors.email" />
                         </div>
@@ -73,17 +96,6 @@
 
                     <!-- Date selector -->
                     <div class="space-y-2">
-                        <!--
-                        <label class="font-medium block"
-                            >Or pick a date manually:</label
-                        >
-                        <input
-                            type="date"
-                            v-model="selectedDate"
-                            @change="fetchAvailableTimes(selectedDate)"
-                            class="input"
-                        />
-                        -->
                         <DateSelector @select="handleDateSelected" />
                         <ErrorMessage :message="errors.selectedDate" />
                     </div>
@@ -152,6 +164,8 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { nextTick } from "vue";
+
 import { DateTime } from "luxon";
 import InputField from "./InputField.vue";
 import TimeButton from "./TimeButton.vue";
@@ -159,6 +173,18 @@ import DateSelector from "@/components/appointments/DateSelector.vue";
 import Confirmation from "@/components/appointments/Confirmation.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import ErrorMessage from "@/components/form/ErrorMessage.vue";
+import CountryCodeSelect from "@/components/form/CountryCodeSelect.vue";
+
+const phoneCode = ref("+1");
+
+async function focusAndScrollTo(ref) {
+    await nextTick();
+    const input = ref?.value?.inputRef;
+    if (input) {
+        input.focus();
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+}
 
 const props = defineProps({
     timezone: String,
@@ -188,6 +214,11 @@ const errorMessage = ref("");
 
 const step = ref("form"); // 'form' | 'loading' | 'confirmed'
 const confirmedData = ref(null);
+
+const firstNameRef = ref(null);
+const lastNameRef = ref(null);
+const phoneRef = ref(null);
+const emailRef = ref(null);
 
 const errors = ref({
     firstName: "",
@@ -237,6 +268,11 @@ function validateForm() {
 
     if (!selectedTime.value) {
         errors.value.selectedTime = "Select a time";
+        isValid = false;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email.value)) {
+        errors.value.email = "Please enter a valid email address.";
         isValid = false;
     }
 
@@ -324,6 +360,7 @@ async function submitAppointment() {
     if (!validateForm()) {
         return;
     }
+
     isLoading.value = true;
     errorMessage.value = "";
     successMessage.value = "";
@@ -347,7 +384,7 @@ async function submitAppointment() {
 
     const payload = {
         name: `${firstName.value} ${lastName.value}`.trim(),
-        phone: phone.value,
+        phone: phoneCode.value + phone.value,
         email: email.value,
         date: selectedDate.value,
         time: selectedTime.value,
@@ -373,6 +410,24 @@ async function submitAppointment() {
 
         successMessage.value = "✅ Appointment successfully booked!";
     } catch (err) {
+        if (err.errors) {
+            const errorKeys = Object.keys(err.errors);
+
+            if (errorKeys.includes("firstName")) {
+                focusAndScrollTo(firstNameRef);
+            } else if (errorKeys.includes("lastName")) {
+                focusAndScrollTo(lastNameRef);
+            } else if (errorKeys.includes("email")) {
+                focusAndScrollTo(emailRef);
+            } else if (errorKeys.includes("phone")) {
+                focusAndScrollTo(phoneRef);
+            }
+
+            const messages = Object.values(err.errors).flat();
+            erro.value = messages.join("\n");
+        } else {
+            erro.value = err.message || "Erro inesperado";
+        }
         errorMessage.value = err.message;
         console.error("Erro geral:", err);
     } finally {
@@ -410,6 +465,14 @@ function resetForm() {
     selectedDate.value = "";
     selectedTime.value = "";
     availableTimes.value = [];
+}
+
+function capitalizeName(name) {
+    return name
+        .toLowerCase()
+        .split(" ")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
 }
 </script>
 
