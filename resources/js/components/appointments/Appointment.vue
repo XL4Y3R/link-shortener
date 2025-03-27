@@ -54,7 +54,9 @@
                             <ErrorMessage :message="errors.lastName" />
                         </div>
                         <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                            <!-- Country code + phone -->
+                            <PhoneField v-model="phone" />
+
+                            <!-- Country code + phone 
                             <div class="col-span-2 flex gap-2 items-start">
                                 <CountryCodeSelect
                                     v-model="phoneCode"
@@ -76,6 +78,7 @@
                                     <ErrorMessage :message="errors.phone" />
                                 </div>
                             </div>
+                            -->
                         </div>
                         <div>
                             <label
@@ -165,7 +168,6 @@
 <script setup>
 import { ref, computed } from "vue";
 import { nextTick } from "vue";
-
 import { DateTime } from "luxon";
 import InputField from "./InputField.vue";
 import TimeButton from "./TimeButton.vue";
@@ -173,9 +175,7 @@ import DateSelector from "@/components/appointments/DateSelector.vue";
 import Confirmation from "@/components/appointments/Confirmation.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 import ErrorMessage from "@/components/form/ErrorMessage.vue";
-import CountryCodeSelect from "@/components/form/CountryCodeSelect.vue";
-
-const phoneCode = ref("+1");
+import PhoneField from "@/components/form/PhoneField.vue";
 
 async function focusAndScrollTo(ref) {
     await nextTick();
@@ -241,6 +241,13 @@ function validateForm() {
         selectedTime: "",
     };
 
+    const parsedPhone = getParsedPhoneNumber();
+
+    if (!parsedPhone) {
+        errors.value.phone = "Please enter a valid phone number.";
+        isValid = false;
+    }
+
     if (!firstName.value) {
         errors.value.firstName = "First name is required";
         isValid = false;
@@ -256,8 +263,8 @@ function validateForm() {
         isValid = false;
     }
 
-    if (!phone.value) {
-        errors.value.phone = "Phone number is required";
+    if (!phoneData.value.phoneNumber || !phoneData.value.isValid) {
+        errors.value.phone = "A valid phone number is required";
         isValid = false;
     }
 
@@ -360,7 +367,6 @@ async function submitAppointment() {
     if (!validateForm()) {
         return;
     }
-
     isLoading.value = true;
     errorMessage.value = "";
     successMessage.value = "";
@@ -384,7 +390,9 @@ async function submitAppointment() {
 
     const payload = {
         name: `${firstName.value} ${lastName.value}`.trim(),
-        phone: phoneCode.value + phone.value,
+        phone: parsed.format("E.164"), //phoneCode.value + phone.value,
+        //countryCode: phoneData.value.countryCallingCode, // "1"
+        //nationalNumber: phoneData.value.nationalNumber, // "2131313131"
         email: email.value,
         date: selectedDate.value,
         time: selectedTime.value,
