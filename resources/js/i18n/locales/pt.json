@@ -1,0 +1,14 @@
+{
+    "form": {
+        "firstName": "Nome",
+        "lastName": "Sobrenome",
+        "email": "Email",
+        "phone": "Telefone",
+        "selectDate": "Escolha uma data",
+        "confirm": "Confirmar Agendamento"
+    },
+    "header": {
+        "title": "Agendamento para",
+        "timezone": "Fuso horário"
+    }
+}

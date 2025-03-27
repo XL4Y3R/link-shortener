@@ -34,3 +34,12 @@ Route::post('/agendamentos', function (Request $request) {
 
     return response()->json($response->json(), $response->status());
 });
+
+
+Route::get('/available-days', function (Request $request) {
+    $response = Http::withToken('f62cfa835ccb11f6ae940b09cef84a54cb353b8989f79cfab9e0a846997a575e')
+        ->withoutVerifying()
+        ->get('https://teste.xl4y3r.com/api/available-days');
+
+    return response()->json($response->json(), $response->status());
+});

@@ -1,0 +1,14 @@
+{
+    "form": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "phone": "Phone",
+        "selectDate": "Select a date",
+        "confirm": "Confirm Appointment"
+    },
+    "header": {
+        "title": "Appointment for",
+        "timezone": "Timezone"
+    }
+}

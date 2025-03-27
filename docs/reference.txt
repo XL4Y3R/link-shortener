@@ -1,1 +1,1 @@
-https://onboard.henrymeds.com/app/appointment/weightmanagement?couponCode=spring100&state=arizona&couponCode=spring100
+https://onboard.henrymeds.com/app/appointment/weightmanagement
