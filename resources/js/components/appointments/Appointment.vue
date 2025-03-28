@@ -98,6 +98,7 @@
                                         ref="phoneRef"
                                         class="w-full"
                                         id="phone"
+                                        @update="handlePhoneUpdate"
                                     />
                                     <ErrorMessage :message="errors.phone" />
                                 </div>
@@ -173,7 +174,12 @@
                                             <TimeButton
                                                 v-for="time in group"
                                                 :key="time.original"
-                                                :time="time.local"
+                                                :time="
+                                                    DateTime.fromFormat(
+                                                        time.local,
+                                                        'HH:mm'
+                                                    ).toFormat('hh:mm a')
+                                                "
                                                 :selected="
                                                     selectedTime ===
                                                     time.original
@@ -286,6 +292,8 @@ const firstNameRef = ref(null);
 const lastNameRef = ref(null);
 const phoneRef = ref(null);
 const emailRef = ref(null);
+const countryCode = ref("");
+const phoneValid = ref(false);
 
 const errors = ref({
     firstName: "",
@@ -468,6 +476,8 @@ async function submitAppointment() {
         phone: phone.value, //phoneCode.value + phone.value,
         //countryCode: phoneData.value.countryCallingCode, // "1"
         //nationalNumber: phoneData.value.nationalNumber, // "2131313131"
+        country_code: countryCode.value,
+        phone_number: phone.value,
         email: email.value,
         date: selectedDate.value,
         time: selectedTime.value,
@@ -556,6 +566,12 @@ function capitalizeName(name) {
         .split(" ")
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
         .join(" ");
+}
+
+function handlePhoneUpdate({ phoneNumber, countryCode: code, isValid }) {
+    phone.value = phoneNumber;
+    countryCode.value = code;
+    phoneValid.value = isValid;
 }
 </script>
 

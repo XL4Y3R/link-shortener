@@ -50,7 +50,7 @@ import { AsYouType, parsePhoneNumberFromString } from "libphonenumber-js";
 const props = defineProps({
     modelValue: String,
 });
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update", "update:modelValue"]);
 
 // Países disponíveis
 const countries = ref([
@@ -64,6 +64,7 @@ const countries = ref([
 const selectedCountry = ref("US");
 const phoneNumber = ref("");
 const maxLength = ref(15);
+const dialCode = ref("+1");
 const isValid = ref(true);
 const inputRef = ref(null);
 
@@ -115,13 +116,23 @@ const formatPhoneNumber = () => {
     emit("update:modelValue", parsed?.format("E.164") || "");
 };
 
-// Sincroniza modelValue com input local
-watch(
-    () => props.modelValue,
-    (newVal) => {
-        if (!newVal) phoneNumber.value = "";
-    }
-);
+watch([selectedCountry, phoneNumber], () => {
+    const country = countries.value.find(
+        (c) => c.code === selectedCountry.value
+    );
+    dialCode.value = country?.dialCode || "";
+
+    const parsed = parsePhoneNumberFromString(
+        `${dialCode.value}${phoneNumber.value}`
+    );
+    isValid.value = parsed?.isValid() || false;
+
+    emit("update", {
+        countryCode: dialCode.value,
+        phoneNumber: phoneNumber.value,
+        isValid: isValid.value,
+    });
+});
 
 // Inicializa
 updateMaxLength();
