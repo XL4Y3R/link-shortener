@@ -1,8 +1,8 @@
 <template>
     <div>
-        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+        <!--<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
             Phone
-        </label>
+        </label>-->
 
         <div
             class="flex items-center rounded-md border border-gray-300 bg-white px-3 py-0 shadow-sm focus-within:ring-2 focus-within:ring-blue-400 focus-within:ring-offset-1"
