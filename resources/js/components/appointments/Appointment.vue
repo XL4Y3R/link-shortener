@@ -486,7 +486,7 @@ async function submitAppointment() {
         state: props.state,
         offset: props.utcOffset,
     };
-    //console.log("Payload enviado:", payload);
+    console.log("Payload enviado:", payload);
 
     try {
         const response = await fetch("/api/agendamentos", {
@@ -562,6 +562,8 @@ function resetForm() {
 
 function capitalizeName(name) {
     return name
+        .replace(/[^a-zA-ZÀ-ÿ\s]/g, "")
+        .replace(/\s+/g, " ")
         .toLowerCase()
         .split(" ")
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
