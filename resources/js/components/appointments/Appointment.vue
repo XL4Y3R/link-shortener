@@ -46,6 +46,10 @@
                                         v-model="firstName"
                                         id="firstName"
                                         ref="firstNameRef"
+                                        @input="
+                                            firstName =
+                                                capitalizeName(firstName)
+                                        "
                                         @blur="
                                             firstName =
                                                 capitalizeName(firstName)
@@ -69,6 +73,9 @@
                                         v-model="lastName"
                                         id="lastName"
                                         ref="lastNameRef"
+                                        @input="
+                                            lastName = capitalizeName(lastName)
+                                        "
                                         @blur="
                                             lastName = capitalizeName(lastName)
                                         "
