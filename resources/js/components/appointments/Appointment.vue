@@ -463,6 +463,8 @@ async function submitAppointment() {
 
     const payload = {
         name: `${firstName.value} ${lastName.value}`.trim(),
+        first_name: `${firstName.value}`,
+        last_name: `${lastName.value}`,
         phone: phone.value, //phoneCode.value + phone.value,
         //countryCode: phoneData.value.countryCallingCode, // "1"
         //nationalNumber: phoneData.value.nationalNumber, // "2131313131"
