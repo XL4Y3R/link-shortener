@@ -1,9 +1,9 @@
 <!-- components/DateSelector.vue -->
 <template>
     <div>
-        <h3 class="font-semibold mb-2 text-center text-gray-700">
+        <!--<h3 class="font-semibold mb-2 text-center text-gray-700">
             Select a date:
-        </h3>
+        </h3>-->
         <LoadingSpinner
             v-if="isLoadingDays"
             message="Loading available days..."

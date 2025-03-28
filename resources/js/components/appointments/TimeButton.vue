@@ -1,6 +1,7 @@
 <!-- HorarioButton.vue -->
 <template>
     <button
+        type="button"
         @click="$emit('select', time)"
         :class="[
             'px-4 py-2 rounded border text-sm',

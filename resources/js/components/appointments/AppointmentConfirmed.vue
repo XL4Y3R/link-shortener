@@ -9,9 +9,31 @@
         <p class="text-gray-600 text-lg">
             Your appointment has been successfully scheduled.
         </p>
-        <p><strong>Date:</strong> {{ data.date }}</p>
-        <p><strong>Time:</strong> {{ data.localTime }}</p>
-        <p><strong>Timezone:</strong> {{ data.timezone }}</p>
+        <p>
+            <strong>Date:</strong><br />
+            {{
+                DateTime.fromISO(data.date).toFormat("MM/dd/yyyy") +
+                " " +
+                DateTime.fromFormat(data.localTime, "HH:mm").toFormat("hh:mm a")
+            }}
+        </p>
+        <!--
+        <p>
+            <strong>Time:</strong>
+            {{
+                DateTime.fromFormat(data.localTime, "HH:mm").toFormat("hh:mm a")
+            }}
+        </p>
+        -->
+        <p>
+            <strong>Timezone:</strong><br />
+            {{
+                data.timezone +
+                " (UTC" +
+                DateTime.now().setZone(data.timezone).toFormat("Z") +
+                ")"
+            }}
+        </p>
         <p class="text-sm text-gray-400">
             You will receive an email with the details shortly.
         </p>
@@ -27,6 +49,8 @@
 </template>
 
 <script setup>
+import { DateTime } from "luxon";
+
 const props = defineProps({
     data: Object, //payload do agendamento
 });

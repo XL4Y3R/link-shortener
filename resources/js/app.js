@@ -1,6 +1,7 @@
 import "./bootstrap";
 //import "bootstrap/dist/css/bootstrap.min.css";
 //import "@coreui/coreui/dist/css/coreui.min.css";
+import "flag-icons/css/flag-icons.min.css";
 
 //import * as bootstrap from 'bootstrap'
 import { createApp } from "vue";

@@ -1,5 +1,6 @@
 <template>
     <div class="flex flex-col items-center">
+        <!-- Botão Voltar -->
         <div class="flex justify-center">
             <button
                 @click="$emit('back')"
@@ -9,137 +10,195 @@
             </button>
         </div>
 
-        <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
-            <h2 class="text-2xl font-bold mb-4">
-                {{ $t("header.title") }} {{ state }} <br />
-                <span class="text-base font-medium text-gray-600">
+        <!-- Card Principal -->
+        <div class="max-w-xl w-full bg-white p-8 rounded-xl shadow space-y-8">
+            <!-- Header -->
+            <div class="text-center">
+                <h2
+                    class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+                >
+                    {{ $t("header.title") }} {{ state }}
+                </h2>
+                <p class="mt-2 text-base text-gray-600">
                     Timezone: {{ timezone }} | UTC{{
                         utcOffset >= 0 ? "+" + utcOffset : utcOffset
                     }}
-                </span>
-            </h2>
+                </p>
+            </div>
+
+            <!-- Formulário -->
             <transition name="fade" mode="out-in">
                 <div v-if="step === 'form'" key="form">
-                    <!-- Client info -->
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                        <div>
-                            <label
-                                :for="firstName"
-                                class="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                {{ $t("form.firstName") }}
-                            </label>
-                            <InputField
-                                v-model="firstName"
-                                id="firstName"
-                                ref="firstNameRef"
-                                @blur="firstName = capitalizeName(firstName)"
-                            />
-                            <ErrorMessage :message="errors.firstName" />
-                        </div>
-
-                        <div>
-                            <label
-                                :for="lastName"
-                                class="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                {{ $t("form.lastName") }}
-                            </label>
-                            <InputField
-                                v-model="lastName"
-                                id="lastName"
-                                ref="lastNameRef"
-                                @blur="lastName = capitalizeName(lastName)"
-                            />
-                            <ErrorMessage :message="errors.lastName" />
-                        </div>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
-                            <PhoneField v-model="phone" />
-
-                            <!-- Country code + phone 
-                            <div class="col-span-2 flex gap-2 items-start">
-                                <CountryCodeSelect
-                                    v-model="phoneCode"
-                                    class="w-20"
-                                />
-                                <div class="flex-1">
-                                    <label
-                                        for="phone"
-                                        class="block text-sm font-medium text-gray-700 mb-1"
-                                    >
-                                        {{ $t("form.phone") }}
-                                    </label>
+                    <form @submit.prevent="submitAppointment">
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0"
+                        >
+                            <!-- First Name -->
+                            <div>
+                                <label
+                                    for="firstName"
+                                    class="block text-sm font-semibold text-gray-900"
+                                >
+                                    {{ $t("form.firstName") }}
+                                </label>
+                                <div class="mt-2.5">
                                     <InputField
+                                        v-model="firstName"
+                                        id="firstName"
+                                        ref="firstNameRef"
+                                        @blur="
+                                            firstName =
+                                                capitalizeName(firstName)
+                                        "
+                                        class="w-full"
+                                    />
+                                    <ErrorMessage :message="errors.firstName" />
+                                </div>
+                            </div>
+
+                            <!-- Last Name -->
+                            <div>
+                                <label
+                                    for="lastName"
+                                    class="block text-sm font-semibold text-gray-900"
+                                >
+                                    {{ $t("form.lastName") }}
+                                </label>
+                                <div class="mt-2.5">
+                                    <InputField
+                                        v-model="lastName"
+                                        id="lastName"
+                                        ref="lastNameRef"
+                                        @blur="
+                                            lastName = capitalizeName(lastName)
+                                        "
+                                        class="w-full"
+                                    />
+                                    <ErrorMessage :message="errors.lastName" />
+                                </div>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="sm:col-span-2">
+                                <label
+                                    class="block text-sm font-semibold text-gray-900"
+                                >
+                                    {{ $t("form.phone") }}
+                                </label>
+                                <div class="mt-2.5">
+                                    <PhoneField
                                         v-model="phone"
-                                        id="phone"
                                         ref="phoneRef"
-                                        placeholder="123-456-7890"
+                                        class="w-full"
+                                        id="phone"
                                     />
                                     <ErrorMessage :message="errors.phone" />
                                 </div>
                             </div>
-                            -->
-                        </div>
-                        <div>
-                            <label
-                                :for="email"
-                                class="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                {{ $t("form.email") }}
-                            </label>
-                            <InputField
-                                v-model="email"
-                                id="email"
-                                type="email"
-                                ref="emailRef"
-                            />
-                            <ErrorMessage :message="errors.email" />
-                        </div>
-                    </div>
 
-                    <!-- Date selector -->
-                    <div class="space-y-2">
-                        <DateSelector @select="handleDateSelected" />
-                        <ErrorMessage :message="errors.selectedDate" />
-                    </div>
+                            <!-- Email -->
+                            <div class="sm:col-span-2">
+                                <label
+                                    for="email"
+                                    class="block text-sm font-semibold text-gray-900"
+                                >
+                                    {{ $t("form.email") }}
+                                </label>
+                                <div class="mt-2.5">
+                                    <InputField
+                                        v-model="email"
+                                        id="email"
+                                        type="email"
+                                        ref="emailRef"
+                                        class="w-full"
+                                    />
+                                    <ErrorMessage :message="errors.email" />
+                                </div>
+                            </div>
 
-                    <!-- Time slots -->
-                    <LoadingSpinner
-                        v-if="isLoadingTimes"
-                        message="Fetching available times..."
-                    />
-                    <div v-if="availableTimes.length" class="space-y-4">
-                        <h3 class="font-semibold text-lg">Available times:</h3>
-                        <ErrorMessage :message="errors.selectedTime" />
-                        <div
-                            v-for="(group, period) in groupedTimes"
-                            :key="period"
-                        >
-                            <h4 class="text-md font-medium mb-1">
-                                {{ period }}
-                            </h4>
-                            <div class="flex flex-wrap gap-2">
-                                <TimeButton
-                                    v-for="time in group"
-                                    :key="time.original"
-                                    :time="time.local"
-                                    :selected="selectedTime === time.original"
-                                    @select="selectedTime = time.original"
+                            <!-- Seletor de Datas -->
+                            <div class="sm:col-span-2">
+                                <label
+                                    class="block text-sm font-semibold text-gray-900"
+                                    >Select a date</label
+                                >
+                                <div class="mt-2.5">
+                                    <DateSelector
+                                        @select="handleDateSelected"
+                                    />
+                                    <ErrorMessage
+                                        :message="errors.selectedDate"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Horários Disponíveis -->
+                            <div class="sm:col-span-2">
+                                <LoadingSpinner
+                                    v-if="isLoadingTimes"
+                                    message="Fetching available times..."
                                 />
+
+                                <div
+                                    v-if="availableTimes.length"
+                                    class="space-y-4"
+                                >
+                                    <h3
+                                        class="text-sm font-semibold text-gray-900"
+                                    >
+                                        Available times:
+                                    </h3>
+                                    <ErrorMessage
+                                        :message="errors.selectedTime"
+                                    />
+
+                                    <div
+                                        v-for="(group, period) in groupedTimes"
+                                        :key="period"
+                                        class="mb-3"
+                                    >
+                                        <h4
+                                            class="text-sm font-medium text-gray-700 mb-1"
+                                        >
+                                            {{ period }}
+                                        </h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            <TimeButton
+                                                v-for="time in group"
+                                                :key="time.original"
+                                                :time="time.local"
+                                                :selected="
+                                                    selectedTime ===
+                                                    time.original
+                                                "
+                                                @select="
+                                                    selectedTime = time.original
+                                                "
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <button
-                            @click="submitAppointment"
-                            :disabled="isLoading"
-                            class="w-full flex justify-center items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <span v-if="!isLoading">Confirm Appointment</span>
-                            <span v-else>Booking...</span>
-                        </button>
-                    </div>
+                        <!-- Submit -->
+                        <div class="mt-8">
+                            <button
+                                type="submit"
+                                :disabled="isLoading"
+                                class="block w-full rounded-md bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {{
+                                    isLoading
+                                        ? "Booking..."
+                                        : "Confirm Appointment"
+                                }}
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
+                <!-- Tela de Confirmação -->
                 <div v-else-if="step === 'confirmation'" key="confirmation">
                     <Confirmation
                         v-if="step === 'confirmed'"
@@ -148,7 +207,8 @@
                     />
                 </div>
             </transition>
-            <!-- Messages -->
+
+            <!-- Mensagens -->
             <div
                 v-if="successMessage"
                 class="text-green-600 text-sm text-center mt-2"
@@ -241,10 +301,16 @@ function validateForm() {
         selectedTime: "",
     };
 
+    /*
     const parsedPhone = getParsedPhoneNumber();
 
     if (!parsedPhone) {
         errors.value.phone = "Please enter a valid phone number.";
+        isValid = false;
+    }
+    */
+    if (!phoneRef.value?.isValid) {
+        errors.value.phone = "Invalid phone number.";
         isValid = false;
     }
 
@@ -258,13 +324,13 @@ function validateForm() {
         isValid = false;
     }
 
-    if (!email.value) {
-        errors.value.email = "Email is required";
+    if (!phoneRef.value?.isValid) {
+        errors.value.phone = "Please enter a valid phone number.";
         isValid = false;
     }
 
-    if (!phoneData.value.phoneNumber || !phoneData.value.isValid) {
-        errors.value.phone = "A valid phone number is required";
+    if (!email.value) {
+        errors.value.email = "Email is required";
         isValid = false;
     }
 
@@ -401,7 +467,7 @@ async function submitAppointment() {
         state: props.state,
         offset: props.utcOffset,
     };
-    console.log("Payload enviado:", payload);
+    //console.log("Payload enviado:", payload);
 
     try {
         const response = await fetch("/api/agendamentos", {
